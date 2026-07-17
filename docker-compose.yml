@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: smartmart-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: smartmart
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./2.database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./3.backend/1auth-service
+      dockerfile: DOCKERFILE
+    container_name: smartmart-auth
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/smartmart
+      JWT_SECRET_KEY: smart-mart-jwt-secret-2024
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  product-service:
+    build:
+      context: ./3.backend/2product_service
+      dockerfile: dockerfile
+    container_name: smartmart-product
+    ports:
+      - "5002:5002"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/smartmart
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cart-service:
+    build:
+      context: ./3.backend/3cart-service
+      dockerfile: Dockerfile
+    container_name: smartmart-cart
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/smartmart
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./3.backend/4order-service
+      dockerfile: Dockerfile
+    container_name: smartmart-order
+    ports:
+      - "5004:5004"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/smartmart
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./3.backend/5payment-service
+      dockerfile: Dockerfile
+    container_name: smartmart-payment
+    ports:
+      - "5005:5005"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/smartmart
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
