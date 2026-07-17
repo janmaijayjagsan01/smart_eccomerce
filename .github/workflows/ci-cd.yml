@@ -29,7 +29,7 @@ jobs:
       - name: Build and push ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ./backend/${{ matrix.service }}
+          context: ./3.backend/${{ matrix.service }}
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/smart-mart-${{ matrix.service }}:latest
