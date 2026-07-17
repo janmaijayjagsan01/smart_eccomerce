@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [1auth-service, 2product-service, 3cart-service, 4order-service, 5payment-service]
+        service: [1auth-service, 2product_service, 3cart-service, 4order-service, 5payment-service]
     
     steps:
       - name: Checkout code
